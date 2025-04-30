@@ -34,3 +34,8 @@ curl -X POST https://4ad8-68-71-74-65.ngrok-free.app/webhook \
   "Department": "{{ body | regex_extract: 'Department:\\s*(.*)' }}",
   "Location": "{{ body | regex_extract: 'Location:\\s*(.*)' }}",
   "Issue Description": "{{ body | regex_extract: 'Issue Description:\\s*([\\s\\S]*?)Attachments:' }}"
+
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:root:GPT Summary: Tech Master, the shrouded enigma known as ${extracted_name}, from the abyss of ${extracted_dept} in ${extracted_loc}, beckons your aid with a cryptic quandary - ${extracted_issue}.
+ffplay version 7.1-full_build-www.gyan.dev Copyright (c) 2003-2024 the FFmpeg developers
+  built with gcc 14.2.0 (Rev1, Built by MSYS2 project)
