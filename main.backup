@@ -29,37 +29,30 @@ logging.basicConfig(level=logging.INFO)
 
 # === GPT SUMMARIZER ===
 def summarize_with_gpt(json_data):
-    # Build a dark-themed, theatrical announcement for the IT desk.
     prompt = (
-        "You are ShadowDesk, a dark, witty herald for the IT department. "
-        "Craft ONE short spoken announcement (under 35 words) addressed to 'Tech Master'. "
-        "Mood: mysterious, slightly ominous; vary wording each time. "
-        "Include—verbatim where possible—the submitter's Name, Department, and Location, "
-        "and paraphrase the Issue Description. "
-        "Return ONLY that single sentence."
+        "You are a helpful assistant. "
+        "Summarize this JSON for verbal understanding and extract the sentiment. "
+        "Keep it short, clear, and conversational."
     )
 
     messages = [
         {"role": "system", "content": prompt},
-        {"role": "user",   "content": str(json_data)}
+        {"role": "user", "content": str(json_data)}
     ]
 
     try:
         response = client.chat.completions.create(
             model=MODEL,
-            messages=messages,
-            temperature=0.7
+            messages=messages
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
         logging.error(f"GPT error: {e}")
-        return "ShadowDesk falters—unable to conjure the words."
+        return "Sorry, I couldn't process that request."
 
 # === TTS SPEAKER ===
 def speak_with_elevenlabs(text):
-    if not ELEVENLABS_API_KEY:
-        logging.error("ELEVENLABS_API_KEY not set.")
-        return
+    logging.info("Using ElevenLabs voice synthesis...")
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{ELEVENLABS_VOICE_ID}"
     headers = {
         "xi-api-key": ELEVENLABS_API_KEY,
@@ -67,20 +60,24 @@ def speak_with_elevenlabs(text):
     }
     payload = {
         "text": text,
-        "model_id": "eleven_multilingual_v2",
-        "voice_settings": {"stability": 0.4, "similarity_boost": 0.7}
+        "model_id": "eleven_monolingual_v1",
+        "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+        }
     }
     try:
         response = requests.post(url, headers=headers, json=payload, stream=True)
-        response.raise_for_status()
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
-            for chunk in response.iter_content(chunk_size=4096):
-                tmp.write(chunk)
-            tmp_path = tmp.name
-        # --- play the file (Linux/macOS/Windows detection omitted for brevity) ---
-        os.system(f'ffplay -nodisp -autoexit "{tmp_path}"')
-        time.sleep(1)
-        os.remove(tmp_path)
+        if response.status_code == 200:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_file:
+                for chunk in response.iter_content(chunk_size=1024):
+                    tmp_file.write(chunk)
+                tmp_path = tmp_file.name
+            os.system(f'start wmplayer "{tmp_path}"')  # Windows only
+            time.sleep(5)
+            os.remove(tmp_path)
+        else:
+            logging.error(f"ElevenLabs API error: {response.text}")
     except Exception as e:
         logging.error(f"ElevenLabs playback error: {e}")
 
@@ -114,3 +111,4 @@ def handle_webhook():
 if __name__ == '__main__':
     logging.info(f"Starting server on port {LISTEN_PORT}...")
     app.run(host='0.0.0.0', port=LISTEN_PORT)
+
