@@ -1,25 +1,18 @@
 # CMAC Clapper
 
-A Python-based webhook server implementation.
+# ChatGPT Webhook Speaker
 
-## Features
+This is a Python-based webhook server that:
+1. Receives webhook POST requests with JSON data.
+2. Sends the data to ChatGPT via the OpenAI API for summarization.
+3. Uses your computer’s speaker to read the summary out loud.
 
-- Webhook server implementation
-- Configurable endpoints
-- Easy to set up and use
+## Requirements
+- Python 3.9+
+- An OpenAI API key
 
-## Installation
+## Setup
 
-See `install.txt` for installation instructions.
-
-## Usage
-
-Run the webhook server:
-
+1. Install dependencies:
 ```bash
-python webhook_server.py
-```
-
-## License
-
-MIT License 
+pip install -r requirements.txt
