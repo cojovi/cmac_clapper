@@ -25,4 +25,12 @@ Per Christian, he said ok to get Chris Harrison a new cp.  His took a tumble, Ch
 
 curl -X POST https://4ad8-68-71-74-65.ngrok-free.app/webhook \
   -H "Content-Type: application/json" \
-  -d '{"data": {"name": "Cody Viveiros", "message": "Cody has fixed all the problems, all it tickets are complete"}}'
+  -d '{"data": {"Name": "Cody Viveiros", "message": "Cody has fixed all the problems, all it tickets are complete"}}'
+
+
+
+  {
+  "Name": "{{ body | regex_extract: 'Name:\\s*(.*)' }}",
+  "Department": "{{ body | regex_extract: 'Department:\\s*(.*)' }}",
+  "Location": "{{ body | regex_extract: 'Location:\\s*(.*)' }}",
+  "Issue Description": "{{ body | regex_extract: 'Issue Description:\\s*([\\s\\S]*?)Attachments:' }}"

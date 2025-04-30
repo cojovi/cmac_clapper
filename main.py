@@ -37,6 +37,7 @@ def summarize_with_gpt(json_data):
         "Include—verbatim where possible—the submitter's Name, Department, and Location, "
         "and paraphrase the Issue Description. "
         "Return ONLY that single sentence."
+        "IMPORTANT: Do not use technical terms, variable names, or words like 'extracted' or 'regex' in your final output sentence."
     )
 
     messages = [
