@@ -6,6 +6,10 @@ import requests
 import tempfile
 import time
 import pyttsx3
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # === CONFIGURATION ===
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "your-openai-api-key")
@@ -17,7 +21,7 @@ SPEECH_RATE = 180
 USE_ELEVENLABS = bool(ELEVENLABS_API_KEY)
 
 # === INITIALIZE ===
-openai.api_key = OPENAI_API_KEY
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
 app = Flask(__name__)
 engine = pyttsx3.init()
 engine.setProperty('rate', SPEECH_RATE)
@@ -37,7 +41,7 @@ def summarize_with_gpt(json_data):
     ]
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model=MODEL,
             messages=messages
         )

@@ -1,4 +1,5 @@
 Flask
 openai
 pyttsx3
+python-dotenv
 
