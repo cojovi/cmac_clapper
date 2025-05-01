@@ -32,48 +32,61 @@ logging.basicConfig(level=logging.INFO)
 def summarize_with_gpt(input_data):
     # Determine if input is structured (dict) or raw text (str)
     if isinstance(input_data, dict):
-        content_to_process = str(input_data) # Convert dict to string if needed by prompt
+        # --- Prompt for JSON/Dictionary Input ---
+        content_to_process = str(input_data) # Convert dict to string for the prompt context
         prompt = (
             "You are ShadowDesk, a dark, witty herald for the IT department. "
-            "You have received structured data about an IT request. " # Prompt adjusted for structured data
-            "Craft ONE short spoken announcement (under 35 words) addressed to 'Tech Master'. "
+            "You have received structured data about an IT request. "
+            "Craft ONE short spoken announcement (under 35 words) addressed to 'Sir Cody of Technology'. " # Changed audience
             "Mood: mysterious, slightly ominous; vary wording each time. "
-            "Include—verbatim where possible—the submitter's Name, Department, and Location, "
-            "and paraphrase the Issue Description from the provided data. "
+            "Include—verbatim where possible—the submitter's Name, Department, and Location fields, " # Referencing fields is ok here
+            "and paraphrase the Issue Description field from the provided data structure. "
             "Return ONLY that single sentence."
-            "IMPORTANT: Do not use technical terms, variable names, or words like 'extracted' or 'regex' in your final output sentence."
+            "IMPORTANT: Do not use technical terms, JSON keys, or words like 'extracted' or 'field' in your final output sentence."
         )
     elif isinstance(input_data, str):
+        # --- Improved Prompt for Plain Text/Email Input ---
         content_to_process = input_data # Use the raw string
         prompt = (
-            "You are ShadowDesk, a dark, witty herald for the IT department. "
-            "You have received the following block of text describing an IT request: " # Prompt adjusted for raw text
-            "Craft ONE short spoken announcement (under 35 words) addressed to 'Tech Master'. "
-            "Mood: mysterious, slightly ominous; vary wording each time. "
-            "From the text block, extract and include the submitter's Name, Department, and Location if present. "
-            "Also, paraphrase the core Issue Description found in the text. "
-            "Return ONLY that single sentence."
-            "IMPORTANT: Do not use technical terms, variable names, or words like 'extracted' or 'regex' in your final output sentence."
-         )
+            "You are ShadowDesk, a dark, witty herald for the IT department, addressing 'Sir Cody of Technology'. "
+            "You have intercepted the raw text body of an incoming email concerning an IT service request. " # More specific and thematic
+            "Read the following email text carefully. "
+            "Distill its essential information into ONE single, concise spoken announcement (under 35 words). "
+            "Maintain a mysterious and slightly ominous tone, varying your phrasing each time for dramatic effect. "
+            "From the provided email text, identify and try to include the submitter's Name and their Department or Location *if these details are clearly mentioned within the text*. " # Emphasize extraction IF PRESENT
+            "Focus on capturing and briefly paraphrasing the core Issue or request described in the email. "
+            "Return ONLY the announcement sentence itself. No extra text or explanation."
+            "IMPORTANT: Avoid technical jargon, variable names like 'name' or 'issue', or meta-commentary like 'The email states...' or 'Request details:'. Just the announcement."
+        )
     else:
+        # --- Fallback for Invalid Data Type ---
         logging.error("Invalid data type passed to summarize_with_gpt")
         return "ShadowDesk is perplexed by the formless void of data."
 
+    # --- Prepare and Send Request to OpenAI ---
     messages = [
         {"role": "system", "content": prompt},
         {"role": "user",   "content": content_to_process} # Send either the stringified dict or the raw text
     ]
 
     try:
+        # Assuming 'client' is your initialized OpenAI client instance
         response = client.chat.completions.create(
-            model=MODEL,
+            model=MODEL, # Assuming MODEL is defined elsewhere (e.g., "gpt-4")
             messages=messages,
-            temperature=0.7
+            temperature=0.7 # Adjust temperature for creativity vs consistency
         )
-        return response.choices[0].message.content.strip()
+        summary = response.choices[0].message.content.strip()
+        # Optional: Add a final check/cleanup if needed
+        # summary = summary.replace("\"", "") # Example: remove stray quotes if they appear
+        return summary
+
     except Exception as e:
         logging.error(f"GPT error: {e}")
         return "ShadowDesk falters—unable to conjure the words."
+
+# Note: Make sure 'client' and 'MODEL' are defined and initialized
+# appropriately elsewhere in your script.
 
 # === TTS SPEAKER ===
 # (No changes needed in TTS functions)
